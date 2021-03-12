@@ -2,9 +2,9 @@ import openpyxl
 from tkinter import *
 from tkinter import ttk
 import os.path  #start file
-import pandas
+import pandas #see if pandas can read openpyxl workbook to make dataframes for IECP
 import numpy
-import pandasgui
+import dfgui #display pandas datafram if pandas reads openpyxl
 
 def pullist_IECP():
     print("Working on it")
@@ -253,7 +253,7 @@ def id_and_name_cleanup(student_cell, absent_hours_cell, late_hours_cell, total_
 # GUI#
 #####
 master = Tk()
-master.title("Pull List GUI 3.0")
+master.title("Pull List GUI")
 
 # Defines and places the notebook widget
 nb = ttk.Notebook(master)
