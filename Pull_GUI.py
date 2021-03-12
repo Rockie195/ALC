@@ -13,8 +13,11 @@ def grd():
     print("Working on it")
 
 
+######
+#AIEP#
+######
 def pullist_AIEP():
-    file_name = e3.get()
+    file_name = e2.get()
     aiep_pull_wb = openpyxl.load_workbook(file_name)
 
     #Format the first sheet
@@ -252,11 +255,12 @@ def id_and_name_cleanup(student_cell, absent_hours_cell, late_hours_cell, total_
 #####
 # GUI#
 #####
-master = Tk()
-master.title("Pull List GUI")
+root = Tk()
+root.title("Pull List GUI")
+root.resizable(False, False)
 
 # Defines and places the notebook widget
-nb = ttk.Notebook(master)
+nb = ttk.Notebook(root)
 nb.grid(row=0, column=0, columnspan=50, rowspan=49, sticky='NESW')
 
 # Adds tab 1 of the notebook
@@ -270,19 +274,15 @@ nb.add(page2, text='AIEP')
 ######################
 # add widgets for IECP#
 ######################
-lab1 = Label(page1, text="File Location", justify=LEFT)
-lab1.grid(row=1, columnspan=1, sticky='w')
-lab2 = Label(page1, text="Number of NP", justify=LEFT)
-lab2.grid(row=2, columnspan=1, sticky='w')
+Label(page1, text="File Location", justify=LEFT).grid(row=1, columnspan=1, sticky='w')
+Label(page1, text="Number of NP", justify=LEFT).grid(row=2, columnspan=1, sticky='w')
 
 e1 = Entry(page1)
+e1.grid(row=1, column=1, sticky=W)
 tkvar = StringVar(page1)
 choices = {1, 2, 3, 4, 5}
 tkvar.set(2)
-e2 = OptionMenu(page1, tkvar, *choices)
-
-e1.grid(row=1, column=1, sticky=W)
-e2.grid(row=2, column=1, sticky=W)
+OptionMenu(page1, tkvar, *choices).grid(row=2, column=1, sticky=W)
 
 Button(page1, text='Pull', command=pullist_IECP).grid(row=3, column=1, sticky=W, pady=4)
 Button(page1, text='GradeGroup Check', command=grd).grid(row=3, column=2, sticky=W, pady=4)
@@ -298,20 +298,17 @@ footer_label1.grid(column=4, row=4)
 ######################
 Label(page2, text="File Location").grid(row=1, columnspan=1, sticky='w')
 Label(page2, text="Max Absent Hours").grid(row=2, columnspan=1, sticky='w')
-e3 = Entry(page2)
-e3.grid(row=1, column=1, columnspan=1, sticky="w")
+e2 = Entry(page2)
+e2.grid(row=1, column=1, columnspan=1, sticky="w")
 
 tkvar2 = DoubleVar(page2)
 choices2 = {22, 40, 41, 47}
 tkvar2.set(40)
-e4 = OptionMenu(page2, tkvar2, *choices2)
-e4.grid(row=2, column=1, columnspan=1, sticky="w")
+OptionMenu(page2, tkvar2, *choices2).grid(row=2, column=1, columnspan=1, sticky="w")
 
 Button(page2, text='Pull', command=pullist_AIEP).grid(row=3, column=1, sticky=W, pady=4)
 
-page2.grid_rowconfigure(3, weight=1)
 page2.grid_columnconfigure(3, weight=1)
-# page2.grid_columnconfigure(4, weight=1)
 
 footer_label2 = Label(page2, text="by Christian", background="white")
 footer_label2.grid(column=4, row=4)
