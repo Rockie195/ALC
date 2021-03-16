@@ -2,23 +2,112 @@ import openpyxl
 from tkinter import *
 from tkinter import ttk
 import os.path  #start file
-import pandas #see if pandas can read openpyxl workbook to make dataframes for IECP
-import numpy
-import dfgui #display pandas datafram if pandas reads openpyxl
+import pandas as pd #see if pandas can read openpyxl workbook to make dataframes for IECP
+import numpy as np
+#from IPython.display import display
+from pandastable import Table
+import tabloo #display pandas dataframe if pandas reads openpyxl
+
+# Check to see if the IECP workbook has been formatted
+CLEANED_IECP_WORKBOOK = False
 
 def pullist_IECP():
-    print("Working on it")
+    file_location = e1.get()
+    # Clean the workbook if it has not been cleaned
+    if not CLEANED_IECP_WORKBOOK:
+        clean_iecp_sheet(file_location)
 
-def grd():
+    # Get the ids of students with bad grades
+    sort_sheet = pd.read_excel(file_location, sheet_name='SORT')
+    bad_grade = sort_sheet[np.in1d(sort_sheet['GRADE'], ['D', 'D+', 'D-', 'F', 'F*', 'NP', 'W', 'W*'])]
+    unique_bad_grade_ids = pd.DataFrame({'ID': list(set(bad_grade['STUDENT ID']))})
+
+    # Check if they failed over the allowed number of times to fail
+    number_of_fails = int(tkvar.get())
+    bad_grade['Fail'] = bad_grade['GRADE'] == "NP"
+    many_fails = bad_grade.groupby(['STUDENT ID'])['Fail'].sum()[bad_grade.groupby(['STUDENT ID'])["Fail"].sum()>=number_of_fails]
+    unique_bad_grade_ids = unique_bad_grade_ids[np.in1d(unique_bad_grade_ids['ID'], many_fails.index)]
+
+    # Create the PULL sheet
+    iecp_pull_wb = openpyxl.load_workbook(file_location)
+    writer = pd.ExcelWriter(file_location, engine='openpyxl')
+    writer.book = iecp_pull_wb
+    writer.sheets = dict((ws.title, ws) for ws in iecp_pull_wb.worksheets)
+    bad_grade.to_excel(writer, "PULL", index=False)
+
+    # Create the PULL_SIMPLE sheet
+
+
+    #print(bad_grade)
+    #print(unique_bad_grade_ids)
+
+    iecp_pull_wb.save(file_location)
+    os.startfile(file_location)
     print("Working on it")
+    return
+
+# Display a data frame table to the user
+def grd():
+    file_location=e1.get()
+    # Clean the workbook if it has not been cleaned
+    if not CLEANED_IECP_WORKBOOK:
+        clean_iecp_sheet(file_location)
+
+    # From the SORT sheet, select the columns the user will need to see if a student received a letter grade
+    sort_sheet = pd.read_excel(file_location, sheet_name='SORT')
+    letter_grade_sheet = pd.read_excel(file_location, sheet_name='lettergrade')
+    # Select the students that have the same id as one of the ids in the lettergrade sheet
+    letter_grade = sort_sheet[np.in1d(sort_sheet['STUDENT ID'],letter_grade_sheet['X Number'])]
+    letter_grade_columns = letter_grade[["STUDENT ID", "LAST NAME", "FIRST NAME", "PROJECT ID", "COURSE TITLE", "INSTRUCTOR", "GRADE"]]
+    df = pd.DataFrame(letter_grade_columns)
+
+    # Create a new TK GUI
+    # Might be able to use toplevel(?) method, but this suffices
+    new_root = Tk()
+    new_root.geometry("")
+    frame = ttk.Frame(new_root)
+    frame.pack(fill='both', expand=True)
+    pt = Table(frame, dataframe=df)
+    pt.show()
+    new_root.mainloop()
+    return
+
+def clean_iecp_sheet(file_location):
+    iecp_pull_wb = openpyxl.load_workbook(file_location)
+
+    # Format the first sheet
+    ws_raw = iecp_pull_wb['Sheet - 1']
+    ws_raw.title = 'RAW'
+    ws_raw.merged_cells = []
+    ws_raw.delete_rows(1, 9)
+
+    # Duplicate the first sheet into the second index
+    ws_sort = iecp_pull_wb.copy_worksheet(ws_raw)
+    ws_sort.title = 'SORT'
+    iecp_pull_wb.move_sheet("SORT", -(len(iecp_pull_wb.sheetnames) - 2))
+
+    # Modify the letter grade sheet
+    ws_lettergrade = iecp_pull_wb['Sheet1']
+    ws_lettergrade.title = 'lettergrade'
+    ws_lettergrade.insert_rows(1)
+    ws_lettergrade.cell(row = 1, column = 1).value = 'X Number'
+
+    # Save the cleaned excel document
+    iecp_pull_wb.save(file_location)
+    # Global variables are looked down on in python :)
+    # User might try cleaning workbook more than once
+    global CLEANED_IECP_WORKBOOK
+    CLEANED_IECP_WORKBOOK = True
+    return
+
 
 
 ######
 #AIEP#
 ######
 def pullist_AIEP():
-    file_name = e2.get()
-    aiep_pull_wb = openpyxl.load_workbook(file_name)
+    file_location = e2.get()
+    aiep_pull_wb = openpyxl.load_workbook(file_location)
 
     #Format the first sheet
     ws_sort = aiep_pull_wb['Sheet - 1']
@@ -233,9 +322,12 @@ def pullist_AIEP():
                                                                  row[14], row[16], row[19], row[12]]))
                 ws_valedictorian.cell(row = len(ws_valedictorian['A']), column = 9).value = student_cell[row[12].value][4]
 
-    aiep_pull_wb.save(file_name)
-    os.startfile(file_name)
-    return;
+    aiep_pull_wb.save(file_location)
+    os.startfile(file_location)
+
+    # Add core level sheets
+
+    return
 
 
 
