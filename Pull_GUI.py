@@ -29,11 +29,12 @@ def pullist_IECP():
     unique_bad_grade_ids = unique_bad_grade_ids[np.in1d(unique_bad_grade_ids['ID'], many_fails.index)]
 
     # Create the PULL sheet
+    pull_sheet = sort_sheet[np.in1d(sort_sheet['STUDENT ID'],unique_bad_grade_ids['ID'])]
     iecp_pull_wb = openpyxl.load_workbook(file_location)
     writer = pd.ExcelWriter(file_location, engine='openpyxl')
     writer.book = iecp_pull_wb
     writer.sheets = dict((ws.title, ws) for ws in iecp_pull_wb.worksheets)
-    bad_grade.to_excel(writer, "PULL", index=False)
+    pull_sheet.to_excel(writer, "PULL", index=False)
 
     # Create the PULL_SIMPLE sheet
 
