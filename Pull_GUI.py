@@ -37,14 +37,66 @@ def pullist_IECP():
     pull_sheet.to_excel(writer, "PULL", index=False)
 
     # Create the PULL_SIMPLE sheet
+    pull_simple_sheet = pd.DataFrame(
+        {'StudentID': unique_bad_grade_ids['ID'], 'LastName': 0, 'FirstName': 0, 'ProjectID': 0, 'CourseTitle': 0, 'Instructor': 0})
+    pull_simple_sheet = pull_simple_sheet.reset_index(drop=True)
+    bad_grade = bad_grade.reset_index(drop=True)
+    for i in range(0, len(pull_simple_sheet)):
+        for j in range(0, len(bad_grade)):
+            if  pull_simple_sheet.loc[i, "StudentID"] == bad_grade.loc[j, "STUDENT ID"]:
+                pull_simple_sheet.loc[i, "LastName"] = bad_grade.loc[j, "LAST NAME"]
+                pull_simple_sheet.loc[i, "FirstName"] = bad_grade.loc[j, "FIRST NAME"]
+                pull_simple_sheet.loc[i, "ProjectID"] = bad_grade.loc[j, "PROJECT ID"]
+                pull_simple_sheet.loc[i, "CourseTitle"] = bad_grade.loc[j, "COURSE TITLE"]
+                pull_simple_sheet.loc[i, "Instructor"] = bad_grade.loc[j, "INSTRUCTOR"]
+                break
+
+    pull_simple_sheet[['StudentID', 'LastName', 'FirstName', 'ProjectID', 'CourseTitle', 'Instructor']].to_excel(writer,
+                                                                                                   "PULL_SIMPLE",
+                                                                                                   index=False)
+    # Create the PULL_PRINT sheet
+    pull_print = pull_sheet[['PROJECT ID', 'COURSE TITLE', 'INSTRUCTOR', 'LAST NAME',
+                             'FIRST NAME', 'STUDENT ID', 'ABSENCES', 'GRADE']]
+    pull_print.to_excel(writer, "PULL_PRINT", index=False)
+
+    # Create the CHANGE sheet for grades changed
+    # The change sheet is empty and is filled out during instructors requests
+    change = pd.DataFrame(
+        {'COURSE NO.': [''], 'SECTION NO.': '', 'PROJECT ID': '', 'ENROLLMENT STATUS': '', 'COURSE TITLE': '',
+         'START DATE': '', 'END DATE': '', 'BUILDING': '', 'ROOM': '', 'INSTRUCTOR': '', 'LAST NAME': '',
+         'FIRST NAME': '', 'STUDENT ID': '', 'EMAIL': '', 'GENDER': '', 'BIRTH DATE': '', 'CITIZENSHIP': '',
+         'ABSENCES': '', 'GRADE From': '', 'GRADE To': ''})
+    change[['COURSE NO.', 'SECTION NO.', 'PROJECT ID', 'ENROLLMENT STATUS', 'COURSE TITLE',
+            'START DATE', 'END DATE', 'BUILDING', 'ROOM', 'INSTRUCTOR', 'LAST NAME',
+            'FIRST NAME', 'STUDENT ID', 'EMAIL', 'GENDER', 'BIRTH DATE', 'CITIZENSHIP',
+            'ABSENCES', 'GRADE From', 'GRADE To']].to_excel(writer, "CHANGE", index=False)
+
+    # Create the PROBATION sheet
+    probation = pd.DataFrame(
+        {'STUDENT ID': unique_bad_grade_ids['ID'], 'LAST NAME': '', 'FIRST NAME': '', 'Reason 1': '', 'Reason 2': '', 'DID NOT PASS': '',
+         'DID NOT PASS 2': '', 'DID NOT PASS 3': '', 'DID NOT PASS 4': '', 'Enrolled in SU?': '', 'COMMENTS': ''})
+    probation = probation.reset_index(drop=True)
+    bad_grade = bad_grade.reset_index(drop=True)
+    for i in range(0, len(probation)):
+        for j in range(0, len(bad_grade)):
+            if  probation.loc[i, "STUDENT ID"] == bad_grade.loc[j, "STUDENT ID"]:
+                probation.loc[i, "LAST NAME"] = bad_grade.loc[j, "LAST NAME"]
+                probation.loc[i, "FIRST NAME"] = bad_grade.loc[j, "FIRST NAME"]
+                break
+
+    probation[['STUDENT ID', 'LAST NAME', 'FIRST NAME', 'Reason 1', 'Reason 2', 'DID NOT PASS', 'DID NOT PASS 2',
+               'DID NOT PASS 3', 'DID NOT PASS 4', 'Enrolled in SU?', 'COMMENTS']].to_excel(writer, "PROBATION",
+                                                                                            index=False)
 
 
-    #print(bad_grade)
-    #print(unique_bad_grade_ids)
+    # Create the A+ sheet for any students that received at least one A+
+    a_plus_students = sort_sheet[np.in1d(sort_sheet['GRADE'],['A+'])]
+    unique_a_plus_ids = list(set(a_plus_students['STUDENT ID']))
+    a_plus_sheet = sort_sheet[np.in1d(sort_sheet['STUDENT ID'],unique_a_plus_ids)]
+    a_plus_sheet.to_excel(writer, "A+", index=False)
 
     iecp_pull_wb.save(file_location)
     os.startfile(file_location)
-    print("Working on it")
     return
 
 # Display a data frame table to the user
@@ -77,6 +129,7 @@ def clean_iecp_sheet(file_location):
     iecp_pull_wb = openpyxl.load_workbook(file_location)
 
     # Format the first sheet
+    # This sheet is the same as SORT, but is wanted in the first tab
     ws_raw = iecp_pull_wb['Sheet - 1']
     ws_raw.title = 'RAW'
     ws_raw.merged_cells = []
@@ -110,13 +163,13 @@ def pullist_AIEP():
     file_location = e2.get()
     aiep_pull_wb = openpyxl.load_workbook(file_location)
 
-    #Format the first sheet
+    # Format the first sheet
     ws_sort = aiep_pull_wb['Sheet - 1']
     ws_sort.title = 'SORT'
     ws_sort.merged_cells = []
     ws_sort.delete_rows(1, 9)
 
-    #Create the attendance sheet
+    # Create the attendance sheet
     ws_attendance = aiep_pull_wb['Sheet1']
     ws_attendance.merged_cells = []
     ws_attendance.delete_rows(1, 7)
@@ -126,29 +179,29 @@ def pullist_AIEP():
         for cell in col:
             if cell.value == '-':
                 cell.value = '0'
-    #Create a dictionary that contains different attendance hours per student id
+    # Create a dictionary that contains different attendance hours per student id
     student_cell = {}
     for row in ws_attendance.iter_rows():
         if row[0].value is not None:
             id_and_name_cleanup(str(row[0].value), row[12].value, row[14].value, float(row[12].value) + float(row[14].value), row[16].value, student_cell)
-    #Create a header row and ATTENDANCE sheet
+    # Create a header row and ATTENDANCE sheet
     first_row_headers = ['StudentID', 'LastName', 'FirstName', 'Absent Hours', 'Late Hours', 'Total Absent Hours', 'Excused']
 
     aiep_pull_wb.create_sheet('ATTENDANCE')
     ws_final_attendance = aiep_pull_wb['ATTENDANCE']
     for i, headers in enumerate(first_row_headers):
         ws_final_attendance.cell(row = 1, column = i + 1).value = headers
-    #Populate the attendance sheet with the values inputted in the dictionary
+    # Populate the attendance sheet with the values inputted in the dictionary
     next_row = 2
     for key, values in student_cell.items():
         ws_final_attendance.cell(column = 1, row = next_row).value = key
         for i in range(2, 8):
             ws_final_attendance.cell(column = i, row = next_row).value = values[i - 2]
         next_row += 1
-    #remove the original sheet with messy data
+    # Remove the original sheet with messy data
     aiep_pull_wb.remove(aiep_pull_wb["Sheet1"])
 
-    #Create a unique set of student
+    # Create a unique set of student
     unique_ids = set()
     for row in ws_sort.iter_rows():
         if row[12].value != "STUDENT ID" and row[12].value is not None:
@@ -157,15 +210,15 @@ def pullist_AIEP():
     no_certificate = {}
     for id in unique_ids:
         no_certificate[id] = False
-    #Check to see if the student received one or more 'D','D+','D-', 'F', 'F*', 'W', 'W*'
-    #Include them in the no certificate list
+    # Check to see if the student received one or more 'D','D+','D-', 'F', 'F*', 'W', 'W*'
+    # Include them in the no certificate list
     fail = ['D','D+','D-', 'F', 'F*', 'W', 'W*']
     #ws_sort = aiep_pull_wb['SORT']
     for row in ws_sort.iter_rows():
         if row[18].value in fail:
             no_certificate[row[12].value] = True
 
-    #Check to see if the student received 2 or more 'NP's
+    # Check to see if the student received 2 or more 'NP's
     many_nps = {}
     for id in unique_ids:
         many_nps[id] = 0
@@ -177,8 +230,8 @@ def pullist_AIEP():
         if many_nps[id] > 1:
             no_certificate[id] = True
 
-    #Get all of the information for students not receiving
-    #a certificate due to grades from the SORT Sheet to create the PULL sheet
+    # Get all of the information for students not receiving
+    # a certificate due to grades from the SORT Sheet to create the PULL sheet
     pull_sheet_headers = []
     for col in ws_sort.iter_cols():
         if col[0].value is not None:
@@ -194,13 +247,13 @@ def pullist_AIEP():
             if no_certificate[row[12].value]:
                 ws_pull.append((cell.value for cell in row[:]))
 
-    #Create the PULL_SIMPLE sheet
+    # Create the PULL_SIMPLE sheet
     pull_simple_headers = ['StudentID', 'LastName', 'FirstName', 'ProjectID', 'CourseTitle' ,'Instructor']
     aiep_pull_wb.create_sheet('PULL_SIMPLE')
     ws_pull_simple = aiep_pull_wb["PULL_SIMPLE"]
     for i, headers in enumerate(pull_simple_headers):
         ws_pull_simple.cell(row = 1, column = i + 1).value = pull_simple_headers[i]
-    #Only list them once with the first class that appears for the sort sheet
+    # Only list them once with the first class that appears for the sort sheet
     already_seen = {}
     for id in unique_ids:
         already_seen[id] = False
@@ -212,7 +265,7 @@ def pullist_AIEP():
                 ws_pull_simple.append((cell.value for cell in [row[12], row[10],
                                                         row[11], row[2], row[4], row[9]]))
 
-    #Check to see if they went over the required attendance limit
+    # Check to see if they went over the required attendance limit
     failed_attendance = {}
     for id in unique_ids:
         failed_attendance[id] = False
@@ -223,14 +276,14 @@ def pullist_AIEP():
                 no_certificate[row[0].value] = True
                 failed_attendance[row[0].value] = [row[1].value, row[2].value]
 
-    #List those with attendance underneath the top ones
+    # List those with attendance underneath the top ones
     for row in ws_final_attendance.iter_rows():
         if row[0].value != "StudentID" and row[0].value is not None:
             if failed_attendance[row[0].value]:
                 ws_pull_simple.append((cell.value for cell in [row[0], row[1], row[2]]))
 
 
-    #Create the PULL_PRINT sheet
+    # Create the PULL_PRINT sheet
     aiep_pull_wb.create_sheet('PULL_PRINT')
     ws_pull_print = aiep_pull_wb["PULL_PRINT"]
 
@@ -238,7 +291,7 @@ def pullist_AIEP():
         ws_pull_print.append((cell.value for cell in [row[2], row[4], row[9], row[10], row[11],
                                                       row[12], row[17], row[18]]))
 
-    #Create the CHANGE sheet
+    # Create the CHANGE sheet
     aiep_pull_wb.create_sheet('CHANGE')
     ws_change = aiep_pull_wb["CHANGE"]
     change_headers = ['COURSE NO.', 'SECTION NO.', 'PROJECT ID', 'ENROLLMENT STATUS', 'COURSE TITLE',
@@ -249,7 +302,7 @@ def pullist_AIEP():
         ws_change.cell(row = 1, column = i + 1).value = headers
 
 
-    #Create the PROBATION sheet
+    # Create the PROBATION sheet
     aiep_pull_wb.create_sheet('PROBATION')
     ws_probation = aiep_pull_wb['PROBATION']
     probation_headers = ['STUDENT ID', 'LAST NAME', 'FIRST NAME', 'Reason 1', 'Reason 2', 'DID NOT PASS',
@@ -273,8 +326,8 @@ def pullist_AIEP():
                 ws_probation.append((cell.value for cell in [row[0], row[1], row[2]]))
 
 
-    #Find all the students who have only had A's
-    #Create the ALL A sheet and the VALEDICTORIAN sheet
+    # Find all the students who have only had A's
+    # Create the ALL A sheet and the VALEDICTORIAN sheet
     not_an_A = ['A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'NP']
     all_a_students = {}
     for id in unique_ids:
@@ -301,7 +354,7 @@ def pullist_AIEP():
             if all_a_students[row[12].value] and row[18].value in a_only_grades:
                 ws_all_a.append((cell.value for cell in row[:]))
 
-    #Use the a_students to form the VALEDICTORIAN sheet
+    # Use the a_students to form the VALEDICTORIAN sheet
     a_student_seen = {}
     for a_student in all_a_students.keys():
         if all_a_students[a_student]:
@@ -332,8 +385,8 @@ def pullist_AIEP():
 
 
 
-#Given different attendance values create a dictionary where the key is
-#the student id and the value is an array with values unique to that student
+# Given different attendance values create a dictionary where the key is
+# the student id and the value is an array with values unique to that student
 def id_and_name_cleanup(student_cell, absent_hours_cell, late_hours_cell, total_absent_hours_cell, excused_cell, all_info):
     student_id = student_cell[student_cell.find("(") + 1:student_cell.find(")")]
     last_name = student_cell[0:student_cell.find(",")]
