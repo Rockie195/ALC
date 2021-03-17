@@ -2,11 +2,13 @@ import openpyxl
 from tkinter import *
 from tkinter import ttk
 import os.path  #start file
-import pandas as pd #see if pandas can read openpyxl workbook to make dataframes for IECP
+import pandas as pd
 import numpy as np
-#from IPython.display import display
 from pandastable import Table
-import tabloo #display pandas dataframe if pandas reads openpyxl
+
+######
+#IECP#
+######
 
 # Check to see if the IECP workbook has been formatted
 CLEANED_IECP_WORKBOOK = False
@@ -155,7 +157,6 @@ def clean_iecp_sheet(file_location):
     return
 
 
-
 ######
 #AIEP#
 ######
@@ -213,7 +214,6 @@ def pullist_AIEP():
     # Check to see if the student received one or more 'D','D+','D-', 'F', 'F*', 'W', 'W*'
     # Include them in the no certificate list
     fail = ['D','D+','D-', 'F', 'F*', 'W', 'W*']
-    #ws_sort = aiep_pull_wb['SORT']
     for row in ws_sort.iter_rows():
         if row[18].value in fail:
             no_certificate[row[12].value] = True
@@ -301,7 +301,6 @@ def pullist_AIEP():
     for i, headers in enumerate(change_headers):
         ws_change.cell(row = 1, column = i + 1).value = headers
 
-
     # Create the PROBATION sheet
     aiep_pull_wb.create_sheet('PROBATION')
     ws_probation = aiep_pull_wb['PROBATION']
@@ -377,13 +376,40 @@ def pullist_AIEP():
                 ws_valedictorian.cell(row = len(ws_valedictorian['A']), column = 9).value = student_cell[row[12].value][4]
 
     aiep_pull_wb.save(file_location)
+    # Add core level sheets using pandas
+    sort_sheet = pd.read_excel(file_location, sheet_name='SORT')
+    aiep_pull_pandas = openpyxl.load_workbook(file_location)
+    writer = pd.ExcelWriter(file_location, engine='openpyxl')
+    writer.book = aiep_pull_pandas
+    writer.sheets = dict((ws.title, ws) for ws in aiep_pull_pandas.worksheets)
+    core_1_sheet = sort_sheet[np.in1d(sort_sheet['COURSE TITLE'], ['100 Listening/Speaking', '101 Grammar/Writing',
+                                                             '102 Grammar/Writing', '103 Grammar/Writing',
+                                                             '104 Grammar/Writing', '405 Reading/Writing',
+                                                             '405 Reading/Writing (6 weeks)', '406 Reading/Writing',
+                                                             '406 Reading/Writing (6 weeks)', '407 Reading/Writing',
+                                                             '407 Reading/Writing (6 weeks)', '408 Reading/Writing',
+                                                             '408 Reading/Writing (6 weeks)'])]
+    core_1_sheet[['STUDENT ID', 'PROJECT ID', 'COURSE TITLE', 'INSTRUCTOR', 'LAST NAME', 'FIRST NAME',
+                  'ABSENCES', 'GRADE']].to_excel(writer, "CORE1", index=False)
+
+    core_2_sheet = sort_sheet[np.in1d(sort_sheet['COURSE TITLE'], ['100 Grammar/Writing', '101 Listening/Speaking',
+                                                                   '102 Reading/Discussion', '103 Reading/Discussion',
+                                                                   '103 Reading/Discussion', '104 Reading/Discussion',
+                                                                   '405 Grammar Workshop', '406 Grammar Workshop',
+                                                                   '407 Grammar Workshop', '408 Grammar Workshop'])]
+
+    core_2_sheet[['STUDENT ID', 'PROJECT ID', 'COURSE TITLE', 'INSTRUCTOR', 'LAST NAME', 'FIRST NAME',
+                  'ABSENCES', 'GRADE']].to_excel(writer, "CORE2", index=False)
+
+    core_3_sheet = sort_sheet[np.in1d(sort_sheet['COURSE TITLE'], ['100 Reading/Discussion', '101 Reading/Discussion',
+                                                             '102 Reading/Discussion', '103 Listening/Speaking'])]
+
+    core_3_sheet[['STUDENT ID', 'PROJECT ID', 'COURSE TITLE', 'INSTRUCTOR', 'LAST NAME', 'FIRST NAME',
+                  'ABSENCES', 'GRADE']].to_excel(writer, "CORE3", index=False)
+
+    aiep_pull_pandas.save(file_location)
     os.startfile(file_location)
-
-    # Add core level sheets
-
     return
-
-
 
 # Given different attendance values create a dictionary where the key is
 # the student id and the value is an array with values unique to that student
@@ -394,12 +420,8 @@ def id_and_name_cleanup(student_cell, absent_hours_cell, late_hours_cell, total_
     all_info[student_id] = [last_name, first_name, absent_hours_cell, late_hours_cell, total_absent_hours_cell, excused_cell]
 
 
-
-
-
-
 #####
-# GUI#
+#GUI#
 #####
 root = Tk()
 root.title("Pull List GUI")
@@ -460,4 +482,3 @@ footer_label2 = Label(page2, text="by Christian", background="white")
 footer_label2.grid(column=4, row=4)
 
 mainloop()
-
