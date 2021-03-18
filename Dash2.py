@@ -6,11 +6,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.firefox.options import Options
+
+# Make firefox run in the background
+options = Options()
+options.add_argument('--headless')
 
 print('Type your Destiny password: ', end='')
 password = pyinputplus.inputPassword()
 
-browser = webdriver.Firefox()
+browser = webdriver.Firefox(options=options)
 browser.get('https://uclasv.destinysolutions.com/srs/logon.do?method=logoff&firstTime=yes')
 # Input username
 wait(browser, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#loginId"))).send_keys('cjgomez')
@@ -65,14 +70,14 @@ def iep_numbers(start, number_of_sessions, skip, program):
 
 print('Current Numbers:')
 # Get all AIEP, IECP, and ACC sessions for this quarter
-iep_numbers(24, 1, [], 'AIEP')
-iep_numbers(58, 4, [], 'IECP')
-iep_numbers(47, 3, [], 'ACC')
+iep_numbers(31, 1, [], 'AIEP')
+iep_numbers(78, 4, [], 'IECP')
+iep_numbers(62, 3, [], 'ACC')
 
 print('Upcoming Numbers: ')
 # Get all upcoming AIEP, IECP, and ACC sessions for next quarter
-iep_numbers(25, 1, [], 'AIEP')
-iep_numbers(62, 4, [], 'IECP')
-iep_numbers(50, 3, [], 'ACC')
+iep_numbers(32, 3, [], 'AIEP')
+iep_numbers(82, 4, [], 'IECP')
+iep_numbers(65, 3, [], 'ACC')
 
 browser.quit()
