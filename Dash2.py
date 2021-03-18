@@ -10,7 +10,6 @@ from selenium.common.exceptions import NoSuchElementException
 print('Type your Destiny password: ')
 password = pyinputplus.inputPassword()
 
-
 def enrollment_numbers(password, css_selector, program):
     browser = webdriver.Firefox()
     browser.get('https://uclasv.destinysolutions.com/srs/logon.do?method=logoff&firstTime=yes')
@@ -46,26 +45,27 @@ def enrollment_numbers(password, css_selector, program):
         print('\t The Dashboard number for ' + program_session_name + ' is ' + str(number_enrolled))
         browser.quit()
     except NoSuchElementException:
-        print('\t The Dashboard number for ' + program_session_name + ' is 0.')
+        print('\t The Dashboard number for ' + program_session_name + ' is 0')
         browser.quit()
+        return
+
+def iep_numbers(start, number_of_sessions, skip, program):
+    program_values = {'AIEP': 1, 'IECP': 2, 'ACC': 3}
+    for i in range(start, start + number_of_sessions):
+        if i in skip:
+            continue
+        enrollment_numbers(password, '#programOfferingProfile_PR000' + str(program_values[program]) + '_0'
+                           + str(i) + '_name', program)
 
 
 print('Current Numbers:')
-AIEP = enrollment_numbers(password, '#programOfferingProfile_PR0001_024_name', 'AIEP')
-IECP12 = enrollment_numbers(password, '#programOfferingProfile_PR0002_058_name', 'IECP')
-IECP_A = enrollment_numbers(password, '#programOfferingProfile_PR0002_059_name', 'IECP')
-IECP_B = enrollment_numbers(password, '#programOfferingProfile_PR0002_060_name', 'IECP')
-IECP_C = enrollment_numbers(password, '#programOfferingProfile_PR0002_061_name', 'IECP')
-ACC_A = enrollment_numbers(password, '#programOfferingProfile_PR0003_047_name', 'ACC')
-ACC_B = enrollment_numbers(password, '#programOfferingProfile_PR0003_048_name', 'ACC')
-ACC_C = numbers(password, '#programOfferingProfile_PR0003_049_name', 'ACC')
+# Get all AIEP, IECP, and ACC sessions for this quarter
+iep_numbers(24, 1, [], 'AIEP')
+iep_numbers(58, 4, [], 'IECP')
+iep_numbers(47, 3, [], 'ACC')
 
 print('Upcoming Numbers: ')
-AIEP1 = enrollment_numbers(password, '#programOfferingProfile_PR0001_025_name', 'AIEP')
-IECP121 = enrollment_numbers(password, '#programOfferingProfile_PR0002_062_name', 'IECP')
-IECP_A1 = enrollment_numbers(password, '#programOfferingProfile_PR0002_063_name', 'IECP')
-IECP_B1 = enrollment_numbers(password, '#programOfferingProfile_PR0002_064_name', 'IECP')
-IECP_C1 = enrollment_numbers(password, '#programOfferingProfile_PR0002_065_name', 'IECP')
-ACC_A1 = enrollment_numbers(password, '#programOfferingProfile_PR0003_050_name', 'ACC')
-ACC_B1 = enrollment_numbers(password, '#programOfferingProfile_PR0003_051_name', 'ACC')
-ACC_C1 = enrollment_numbers(password, '#programOfferingProfile_PR0003_052_name', 'ACC')
+# Get all upcoming AIEP, IECP, and ACC sessions for next quarter
+iep_numbers(25, 1, [], 'AIEP')
+iep_numbers(62, 4, [], 'IECP')
+iep_numbers(50, 3, [], 'ACC')
