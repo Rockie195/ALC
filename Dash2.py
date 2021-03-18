@@ -13,32 +13,33 @@ password = pyinputplus.inputPassword()
 def enrollment_numbers(password, css_selector, program):
     browser = webdriver.Firefox()
     browser.get('https://uclasv.destinysolutions.com/srs/logon.do?method=logoff&firstTime=yes')
-    username_box = browser.find_element_by_css_selector('#loginId')
-    username_box.click()
-    username_box.send_keys('cjgomez')
-    password_box = browser.find_element_by_css_selector('#password')
-    password_box.click()
-    password_box.send_keys(password)
-    logon_button = browser.find_element_by_css_selector('#logonButton')
-    logon_button.click()
-    programs_tab = browser.find_element_by_css_selector('#menu-link-CurrMgrPrograms')
-    programs_tab.click()
+    # Input username
+    wait(browser, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#loginId"))).send_keys('cjgomez')
+    # Input password
+    wait(browser, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#password"))).send_keys(password)
+    # Click logon button
+    wait(browser, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#logonButton"))).click()
+    # Click the programs tab
+    wait(browser, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#menu-link-CurrMgrPrograms"))).click()
+    # Enter the Program name
+    wait(browser, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#programName"))).send_keys(program)
     program_name = browser.find_element_by_css_selector('#programName')
-    program_name.click()
-    program_name.send_keys(program)
     program_name.submit()
-    time.sleep(2)
+    # Wait for the program link to appear, then save the text and click on the link
+    wait(browser, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector)))
     program_session = browser.find_element_by_css_selector(css_selector)
     program_session_name = program_session.text
     program_session.click()
-    time.sleep(1)
-    hover_over_programs_tab = browser.find_element_by_css_selector('#menu-link-CurrMgrPrograms')
+    # Wait for the program tab to appear and then hover over the program tab
+    wait(browser, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#menu-link-CurrMgrPrograms")))
+    hover_over_programs_tab = browser.find_element_by_css_selector("#menu-link-CurrMgrPrograms")
     hover = ActionChains(browser).move_to_element(hover_over_programs_tab)
     hover.perform()
-    dashboard = browser.find_element_by_css_selector('#menu-link-CurrMgrProgramsProgramProfileDashboard')
-    dashboard.click()
+    # Click on dashboard
+    wait(browser, 10).until(EC.element_to_be_clickable(
+        (By.CSS_SELECTOR, "#menu-link-CurrMgrProgramsProgramProfileDashboard"))).click()
+    # If the dashboard appears, get the data. If there is no dashboard then there are zero students
     try:
-        # browser.find_element_by_css_selector('#genderSummary > tfoot:nth-child(2) > tr:nth-child(1) > td:nth-child(3)')
         enrolled = browser.find_element_by_css_selector(
             '#genderSummary > tfoot:nth-child(2) > tr:nth-child(1) > td:nth-child(3)')
         number_enrolled = round(float(enrolled.text))
