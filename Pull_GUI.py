@@ -393,7 +393,7 @@ def pullist_AIEP():
                   'ABSENCES', 'GRADE']].to_excel(writer, "CORE1", index=False)
 
     core_2_sheet = sort_sheet[np.in1d(sort_sheet['COURSE TITLE'], ['100 Grammar/Writing', '101 Listening/Speaking',
-                                                                   '102 Reading/Discussion', '103 Reading/Discussion',
+                                                                   '102 Listening/Speaking', '103 Reading/Discussion',
                                                                    '103 Reading/Discussion', '104 Reading/Discussion',
                                                                    '405 Grammar Workshop', '406 Grammar Workshop',
                                                                    '407 Grammar Workshop', '408 Grammar Workshop'])]
