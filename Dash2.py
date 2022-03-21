@@ -64,20 +64,24 @@ def iep_numbers(start, number_of_sessions, skip, program):
     for i in range(start, start + number_of_sessions):
         if i in skip:
             continue
-        enrollment_numbers('#programOfferingProfile_PR000' + str(program_values[program]) + '_0'
-                           + str(i) + '_name', program)
+        if i < 100:
+            enrollment_numbers('#programOfferingProfile_PR000' + str(program_values[program]) + '_0'
+                               + str(i) + '_name', program)
+        else:
+            enrollment_numbers('#programOfferingProfile_PR000' + str(program_values[program]) + '_'
+                               + str(i) + '_name', program)
 
 
 print('Current Numbers:')
 # Get all AIEP, IECP, and ACC sessions for this quarter
-iep_numbers(31, 1, [], 'AIEP')
-iep_numbers(78, 4, [], 'IECP')
-iep_numbers(62, 3, [], 'ACC')
+iep_numbers(37, 1, [], 'AIEP')
+iep_numbers(94, 4, [], 'IECP')
+iep_numbers(74, 3, [], 'ACC')
 
 print('Upcoming Numbers: ')
 # Get all upcoming AIEP, IECP, and ACC sessions for next quarter
-iep_numbers(32, 3, [], 'AIEP')
-iep_numbers(82, 4, [], 'IECP')
-iep_numbers(65, 3, [], 'ACC')
+iep_numbers(38, 3, [], 'AIEP')
+iep_numbers(98, 4, [], 'IECP')
+iep_numbers(77, 3, [], 'ACC')
 
 browser.quit()
