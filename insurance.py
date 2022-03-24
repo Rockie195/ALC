@@ -13,8 +13,8 @@ except FileNotFoundError:
     print("Provide an existing file path")
     sys.exit()
 
+# Insurance Coverage Dates
 start_date = sys.argv[2]
-
 end_date = sys.argv[3]
 
 # Select the columns I want to keep
@@ -28,7 +28,7 @@ df['Local City'].fillna('Los Angeles', inplace = True)
 df['Local State/Province'].fillna('CA', inplace = True)
 df['Local Country'].fillna('USA', inplace = True)
 df['Local Zip/Postal Code'].fillna('90024', inplace = True)
-# df['A'] = df['Local Street 1']
+
 # Replace null values in Local Street 2 only if Local Street 1's location is Lindbrook
 pairing = {'10920 Lindbrook Dr': '#100'}
 mapping = df['Local Street 1'].map(pairing)
@@ -37,7 +37,7 @@ df['Local Street 2'] = df['Local Street 2'].combine_first(mapping)
 # Add extra columns needed for upload
 df['Start Date'] = start_date
 df['End Date'] = end_date
-print(df)
+
 # Write any changes to the excel sheet, save and open
 book = load_workbook(sys.argv[1])
 del book[book.sheetnames[0]]
