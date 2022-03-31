@@ -36,6 +36,14 @@ elif program == 'ic':
     program = 'Intensive English Communication Program - C 4-weeks'
 elif program == 'sc':
     program = 'Intensive English Communication Program - C 3-weeks'
+elif program == 'aa':
+    program = 'American Culture and Communication Program - A 4-weeks'
+elif program == 'ab':
+    program = 'American Culture and Communication Program - B 4-weeks'
+elif program == 'ac':
+    program = 'American Culture and Communication Program - C 4-weeks'
+elif program == 'a3':
+    program = 'American Culture and Communication Program - C 3-weeks'
 else:
     print('Please look up abbreviations')
     sys.exit()
