@@ -1,5 +1,5 @@
 """
-Quick and messy solution to change unneed fees from active status to
+Quick and messy solution to change unneeded fees from active status to
 inactive status.
 """
 
