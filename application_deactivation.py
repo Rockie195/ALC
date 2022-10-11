@@ -25,7 +25,7 @@ print('Type your Destiny password: ', end='')
 password = pyinputplus.inputPassword()
 
 browser = webdriver.Firefox(options=options)
-browser.get('https://uclatestsv.destinysolutions.com/')
+browser.get('https://uclasv.destinysolutions.com/')
 
 # Input username
 wait(browser, 10).until(EC.element_to_be_clickable(
@@ -53,16 +53,19 @@ def main_app_page():
     wait(browser, 20).until(EC.visibility_of_element_located(
                                 (By.CSS_SELECTOR, "#search"))).click()
 
-
-for i in deactivate_applications:
-    main_app_page()
-    wait(browser, 20).until(EC.visibility_of_element_located(
-        (By.XPATH, '/html/body/div[2]/div[4]/div/div/div[1]/form/div[2]/table/tbody/tr[' + str(i) + ']/td[1]/a'))).click()
-    wait(browser, 10).until(EC.element_to_be_clickable(
-        (By.XPATH, '//*[@id="content01"]/form/div[1]/table[1]/tbody/tr/td[2]/input'))).send_keys(Keys.HOME, "zzz-")
-    wait(browser, 20).until(EC.visibility_of_element_located(
-        (By.XPATH, '/html/body/div[2]/div[4]/div/div/div[1]/form/div[1]/table[1]/tbody/tr/td[4]/select'))).click()
-    wait(browser, 20).until(EC.visibility_of_element_located(
-        (By.XPATH, '/html/body/div[2]/div[4]/div/div/div[1]/form/div[1]/table[1]/tbody/tr/td[4]/select/option[2]'))).click()
-    wait(browser, 20).until(EC.visibility_of_element_located(
-        (By.CSS_SELECTOR, '#save'))).click()
+failed_value = deactivate_applications[0]
+try:
+    for i in deactivate_applications:
+        main_app_page()
+        wait(browser, 20).until(EC.visibility_of_element_located(
+            (By.XPATH, '/html/body/div[2]/div[4]/div/div/div[1]/form/div[2]/table/tbody/tr[' + str(i) + ']/td[1]/a'))).click()
+        wait(browser, 10).until(EC.element_to_be_clickable(
+            (By.XPATH, '//*[@id="content01"]/form/div[1]/table[1]/tbody/tr/td[2]/input'))).send_keys(Keys.HOME, "zzz-")
+        wait(browser, 20).until(EC.visibility_of_element_located(
+            (By.XPATH, '/html/body/div[2]/div[4]/div/div/div[1]/form/div[1]/table[1]/tbody/tr/td[4]/select'))).click()
+        wait(browser, 20).until(EC.visibility_of_element_located(
+            (By.XPATH, '/html/body/div[2]/div[4]/div/div/div[1]/form/div[1]/table[1]/tbody/tr/td[4]/select/option[2]'))).click()
+        wait(browser, 20).until(EC.visibility_of_element_located(
+            (By.CSS_SELECTOR, '#save'))).click()
+except:
+    print(f"{failed_value} failed to be deactivated.")
