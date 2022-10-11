@@ -67,5 +67,6 @@ try:
             (By.XPATH, '/html/body/div[2]/div[4]/div/div/div[1]/form/div[1]/table[1]/tbody/tr/td[4]/select/option[2]'))).click()
         wait(browser, 20).until(EC.visibility_of_element_located(
             (By.CSS_SELECTOR, '#save'))).click()
+        failed_value = i
 except:
     print(f"{failed_value} failed to be deactivated.")
