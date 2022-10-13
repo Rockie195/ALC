@@ -70,3 +70,5 @@ try:
         failed_value = i
 except:
     print(f"{failed_value} failed to be deactivated.")
+    
+browser.quit()
