@@ -114,4 +114,4 @@ try:
 except:  # Capture all exceptions when trying to deactivate
     print(f"{failed_value} failed to be deactivated.")
 
-
+browser.quit()
